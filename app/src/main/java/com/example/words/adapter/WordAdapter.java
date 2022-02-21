@@ -1,6 +1,8 @@
 package com.example.words.adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,18 +13,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.words.R;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder> {
     List<String> filteredWords;
 
-    public WordAdapter(Context context) {
+    public WordAdapter(Context context, String letter) {
+        filteredWords = new ArrayList<>();
+
         String[] array = context.getResources().getStringArray(R.array.words);
-        List<String> words = Arrays.asList(array);
-        filteredWords = words;
+        filteredWords = Arrays.stream(array)
+                .filter(s->s.startsWith(letter))
+                .collect(Collectors.toList());
     }
 
     @NonNull
@@ -36,6 +43,11 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
     public void onBindViewHolder(@NonNull WordViewHolder holder, int position) {
         String item = filteredWords.get(position);
         holder.button.setText(item);
+        holder.button.setOnClickListener((view)-> {
+            Uri uri = Uri.parse("https://yandex.ru/search/?text=" + item);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            holder.button.getContext().startActivity(intent);
+        });
     }
 
     @Override
@@ -43,7 +55,7 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
         return filteredWords.size();
     }
 
-    class WordViewHolder extends RecyclerView.ViewHolder {
+    static class WordViewHolder extends RecyclerView.ViewHolder {
         Button button;
 
         public WordViewHolder(@NonNull View itemView) {
